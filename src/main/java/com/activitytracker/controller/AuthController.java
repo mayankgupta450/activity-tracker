@@ -1,6 +1,7 @@
 package com.activitytracker.controller;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -21,6 +22,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.activitytracker.dto.LoginRequestDto;
 import com.activitytracker.dto.RegisterRequestDto;
+import com.activitytracker.dto.UserResponseDto;
 import com.activitytracker.entity.User;
 import com.activitytracker.repo.UserRepository;
 import com.activitytracker.securityconfig.CustomUserDetailsService;
@@ -40,11 +42,10 @@ public class AuthController {
 
 	@Autowired
 	private CustomUserDetailsService userDetailsService;
-	
+
 	@Autowired
 	UserRepository userRepository;
-	
-	
+
 	@Autowired
 	UserService service;
 
@@ -74,8 +75,8 @@ public class AuthController {
 		}
 	}
 
-	
-	//USING THIS when user change token in localstorage on ui this api hits in context file to validate
+	// USING THIS when user change token in localstorage on ui this api hits in
+	// context file to validate
 	@GetMapping("/auth/validate-token")
 	public ResponseEntity<?> validateToken(@RequestHeader("Authorization") String authHeader) {
 		try {
@@ -96,31 +97,36 @@ public class AuthController {
 			return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Invalid token");
 		}
 	}
-	
-	
 
 	// api for register user
 	@PostMapping("/api/admin/users")
-	public ResponseEntity<?> registerUser(
-	        @Valid @RequestBody RegisterRequestDto request,
-	        BindingResult bindingResult) {
+	public ResponseEntity<?> registerUser(@Valid @RequestBody RegisterRequestDto request, BindingResult bindingResult) {
 
-	    // validation using dependency
-	    if (bindingResult.hasErrors()) {
-	        Map<String, String> errors = new HashMap<>();
-	        bindingResult.getFieldErrors()
-	                .forEach(err -> errors.put("error", err.getDefaultMessage()));
-	        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errors);
-	    }
-	    
-	    try {
-	        Map<String, Object> response = service.registerUser(request);
-	        return ResponseEntity.status(HttpStatus.CREATED).body(response);
+		// validation using dependency
+		if (bindingResult.hasErrors()) {
+			Map<String, String> errors = new HashMap<>();
+			bindingResult.getFieldErrors().forEach(err -> errors.put("error", err.getDefaultMessage()));
+			return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errors);
+		}
 
-	    } catch (RuntimeException e) {
-	        return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-	                .body(Map.of("error", e.getMessage()));
-	    }
+		try {
+			Map<String, Object> response = service.registerUser(request);
+			return ResponseEntity.status(HttpStatus.CREATED).body(response);
+
+		} catch (RuntimeException e) {
+			return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(Map.of("error", e.getMessage()));
+		}
+	}
+
+	@GetMapping("api/admin/users")
+	public ResponseEntity<?> getAllUsers() {
+		try {
+			List<UserResponseDto> users = service.getAllUsers();
+			return ResponseEntity.ok(users);
+		} catch (Exception e) {
+			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+					.body(Map.of("error", "Failed to fetch users"));
+		}
 	}
 
 }

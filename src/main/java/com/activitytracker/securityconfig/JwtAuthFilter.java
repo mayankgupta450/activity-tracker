@@ -33,7 +33,7 @@ public class JwtAuthFilter extends OncePerRequestFilter {
 
         String path = request.getServletPath();
 
-        //Skip JWT check for login endpoint
+        //do not need to validatre for login 
         if ("/login".equals(path)) {
             filterChain.doFilter(request, response);
             return;
@@ -45,13 +45,13 @@ public class JwtAuthFilter extends OncePerRequestFilter {
         String token = null;
         String username = null;
 
-        // 2️⃣ Extract token
+        // extracting token 
         if (authHeader != null && authHeader.startsWith("Bearer ")) {
             token = authHeader.substring(7);
             username = jwtUtil.extractUsername(token);
         }
 
-        // 3️⃣ Validate token and set authentication
+        // validating and checking already user login or not
         if (username != null &&
             SecurityContextHolder.getContext().getAuthentication() == null) {
 
@@ -75,7 +75,7 @@ public class JwtAuthFilter extends OncePerRequestFilter {
             }
         }
 
-        // Continue request flow (MANDATORY)
+        // Continue request flow
         filterChain.doFilter(request, response);
     }
 

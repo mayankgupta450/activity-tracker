@@ -12,13 +12,14 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import lombok.ToString;
 
 @Entity
 @Table(name = "user_programs",uniqueConstraints = @UniqueConstraint(columnNames = {"user_id", "program_id"}))
 @Getter @Setter
 @NoArgsConstructor @AllArgsConstructor
+@ToString
 public class UserProgram {
-	
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

@@ -1,5 +1,7 @@
 package com.activitytracker.dto;
 
+import java.util.List;
+
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -16,4 +18,6 @@ public class UserResponseDto {
 	private String username;
 	private String email;
 	private String role;
+	private List<Long> programIds;
+	private List<String> programNames; 
 }

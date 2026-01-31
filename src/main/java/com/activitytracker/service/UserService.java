@@ -1,8 +1,10 @@
 package com.activitytracker.service;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -11,9 +13,13 @@ import org.springframework.stereotype.Service;
 
 import com.activitytracker.dto.RegisterRequestDto;
 import com.activitytracker.dto.UserResponseDto;
+import com.activitytracker.entity.Program;
 import com.activitytracker.entity.Role;
 import com.activitytracker.entity.User;
+import com.activitytracker.entity.UserProgram;
+import com.activitytracker.repo.ProgramRepository;
 import com.activitytracker.repo.RoleRepository;
+import com.activitytracker.repo.UserProgramRepository;
 import com.activitytracker.repo.UserRepository;
 
 @Service
@@ -27,6 +33,12 @@ public class UserService {
 
 	@Autowired
 	private PasswordEncoder passwordEncoder;
+
+	@Autowired
+	private ProgramRepository programRepository;
+
+	@Autowired
+	private UserProgramRepository userProgramRepository;
 
 	public Map<String, Object> registerUser(RegisterRequestDto request) {
 
@@ -55,24 +67,58 @@ public class UserService {
 																			// password
 		user.setRole(role);
 
-		User savedUser = userRepository.save(user);
+		User savedUser = userRepository.save(user);  //saving user inton table db
 
+		List<UserProgram> userPrograms = new ArrayList<>();
+
+		//getting program id multiple from ui thats why looping done
+		for (Long programId : request.getProgramIds()) {
+			Program program = programRepository.findById(programId)
+					.orElseThrow(() -> new RuntimeException("Program not found"));
+
+			UserProgram up = new UserProgram();
+			up.setUser(savedUser);
+			up.setProgram(program);
+			userPrograms.add(up);
+		}
+
+		//now saving data in program table in db
+		userProgramRepository.saveAll(userPrograms);
+		
+		List<String> programNames = userPrograms.stream().map(up -> up.getProgram().getName()).toList();
+
+		List<Long> programIds = userPrograms.stream().map(up -> up.getProgram().getId()).toList();
 		// response creation for ui send
 		Map<String, Object> response = new HashMap<>();
 		response.put("id", savedUser.getId());
 		response.put("username", savedUser.getName());
 		response.put("email", savedUser.getEmail());
 		response.put("role", savedUser.getRole().getRoleName());
-
+		response.put("programIds", programIds); 
+		response.put("programNames", programNames); 
 		return response;
 	}
 
 	public List<UserResponseDto> getAllUsers() {
-		//getting user data from db
-		List<User> users = userRepository.findAll();
-		
-		return users.stream().map(
-				user -> new UserResponseDto(user.getId(), user.getName(), user.getEmail(), user.getRole().getRoleName()
-				)).collect(Collectors.toList());
+
+		return userRepository.findAll().stream().map(user -> {
+			List<UserProgram> userPrograms = userProgramRepository.findProgramsByUserId(user.getId());
+	        List<Long> programIds = userPrograms.stream()
+	                .map(up -> up.getProgram().getId())
+	                .toList();
+
+	        List<String> programNames = userPrograms.stream()
+	                .map(up -> up.getProgram().getName())
+	                .toList();
+	        return new UserResponseDto(
+	                user.getId(),
+	                user.getName(),
+	                user.getEmail(),
+	                user.getRole().getRoleName(),
+	                programIds,
+	                programNames
+	        );
+		}).toList();
 	}
+
 }

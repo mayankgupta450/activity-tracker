@@ -1,5 +1,7 @@
 package com.activitytracker.dto;
 
+import java.util.List;
+
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
@@ -25,5 +27,6 @@ public class RegisterRequestDto {
 
     @NotBlank(message = "Role is required")
     private String role;
-
+    
+    private List<Long> programIds;
 }

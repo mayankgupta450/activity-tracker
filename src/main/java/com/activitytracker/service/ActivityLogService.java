@@ -71,4 +71,8 @@ public class ActivityLogService {
 	        )).toList();
 	    }
 
+	  // Fetch user-specific activities
+	    public List<ActivityLog> getUserActivities(Long userId) {
+	        return activityLogRepository.findByUserId(userId);
+	    }
 }

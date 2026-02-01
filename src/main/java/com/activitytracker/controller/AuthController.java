@@ -13,6 +13,7 @@ import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -59,12 +60,18 @@ public class AuthController {
 			UserDetails userDetails = (UserDetails) authentication.getPrincipal();
 
 			String token = jwtUtil.generateToken(userDetails.getUsername());
+			User user = userRepository.findByEmail(userDetails.getUsername())
+		                .orElseThrow(() ->
+		                        new UsernameNotFoundException("User not found with email: " + userDetails.getUsername())
+		                );
 
 			// Include email and role in response
 			Map<String, Object> response = new HashMap<>();
 			response.put("token", token);
 			response.put("email", userDetails.getUsername());
 			response.put("role", userDetails.getAuthorities().stream().findFirst().get().getAuthority());
+			response.put("id",user.getId());
+
 
 			return ResponseEntity.ok(response);
 
@@ -84,11 +91,17 @@ public class AuthController {
 			String username = jwtUtil.extractUsername(token);
 
 			UserDetails userDetails = userDetailsService.loadUserByUsername(username);
+			
+			User user = userRepository.findByEmail(userDetails.getUsername())
+	                .orElseThrow(() ->
+	                        new UsernameNotFoundException("User not found with email: " + userDetails.getUsername())
+	                );
 
 			if (jwtUtil.validateToken(token, userDetails)) {
 				Map<String, Object> res = new HashMap<>();
 				res.put("email", userDetails.getUsername());
 				res.put("role", userDetails.getAuthorities().stream().findFirst().get().getAuthority());
+				res.put("id",user.getId());
 				return ResponseEntity.ok(res);
 			} else {
 				return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Invalid token");

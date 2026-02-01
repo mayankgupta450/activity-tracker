@@ -10,6 +10,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
@@ -122,11 +123,20 @@ public class ActivityController {
 
 	    }
 	 
+	  // getting all actitiity data for admin only
 	    @GetMapping("/getall-activity")
 	    @PreAuthorize("hasRole('ADMIN')")
 	    public ResponseEntity<List<ActivityLogResponse>> getAllActivityLogs() {
 	        List<ActivityLogResponse> allActivityData = activityLogService.getAllActivityLogs();
 	        return ResponseEntity.ok(allActivityData);
+	    }
+	    
+	 // getting acvtiivty log data user specific by id
+	    @GetMapping("/user/{userId}")
+	    @PreAuthorize("hasRole('USER') or hasRole('ADMIN')")
+	    public ResponseEntity<List<ActivityLog>> getUserActivities(@PathVariable Long userId) {
+	        List<ActivityLog> activities = activityLogService.getUserActivities(userId);
+	        return ResponseEntity.ok(activities);
 	    }
 
 }

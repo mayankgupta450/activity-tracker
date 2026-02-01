@@ -7,10 +7,14 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.activitytracker.dto.ActivityLogRequest;
 import com.activitytracker.dto.UserProgramResponse;
+import com.activitytracker.entity.ActivityLog;
 import com.activitytracker.entity.ActivityType;
 import com.activitytracker.entity.Program;
 import com.activitytracker.entity.User;
@@ -19,6 +23,7 @@ import com.activitytracker.entity.WorkContext;
 import com.activitytracker.repo.UserProgramRepository;
 import com.activitytracker.repo.UserRepository;
 import com.activitytracker.securityconfig.JwtUtil;
+import com.activitytracker.service.ActivityLogService;
 
 @RestController
 public class ActivityController {
@@ -32,6 +37,9 @@ public class ActivityController {
 	
 	@Autowired
 	private UserProgramRepository programRepository;
+	
+	@Autowired
+	private ActivityLogService activityLogService;
 	
 	@GetMapping("/activityTypeData")
     public List<String> getActivityTypes() {
@@ -83,5 +91,15 @@ public class ActivityController {
 	            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
 	        }
 	    }
+	 
+	  @PostMapping("/save-activity")
+	    public ResponseEntity<?> saveActivity(
+	            @RequestBody ActivityLogRequest request
+	    ) {
+	        ActivityLog savedActivity = activityLogService.saveActivity(request);
+
+	        return ResponseEntity.ok(savedActivity);
+	    }
+	 
 
 }

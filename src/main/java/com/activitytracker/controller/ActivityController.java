@@ -10,6 +10,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.activitytracker.dto.UserProgramResponse;
 import com.activitytracker.entity.ActivityType;
 import com.activitytracker.entity.Program;
 import com.activitytracker.entity.User;
@@ -49,7 +50,7 @@ public class ActivityController {
     }
 
 	 @GetMapping("/user-specific-programs")
-	    public ResponseEntity<List<String>> getProgramsForUser(
+	    public ResponseEntity<List<UserProgramResponse>> getProgramsForUser(
 	            @RequestHeader("Authorization") String authHeader) {
 
 	        try {
@@ -68,11 +69,15 @@ public class ActivityController {
 	            // Fetch programs only for this user
 	            List<UserProgram> programs = programRepository.findProgramsByUserId(userId);
 	            
-	            List<String> programNames = programs.stream()
-		                .map(up -> up.getProgram().getName())
-		                .toList();
-
-	            return ResponseEntity.ok(programNames);
+	            //custome response return user id program name and program id so i can use in user id in ui and pass in next call
+	            List<UserProgramResponse> response = programs.stream()
+	                    .map(up -> new UserProgramResponse(
+	                            userId,
+	                            up.getProgram().getId(),
+	                            up.getProgram().getName()
+	                    ))
+	                    .toList();
+	            return ResponseEntity.ok(response);
 
 	        } catch (Exception e) {
 	            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();

@@ -1,9 +1,12 @@
 package com.activitytracker.service;
 
+import java.util.List;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.activitytracker.dto.ActivityLogRequest;
+import com.activitytracker.dto.ActivityLogResponse;
 import com.activitytracker.entity.ActivityLog;
 import com.activitytracker.entity.ActivityType;
 import com.activitytracker.entity.Program;
@@ -49,5 +52,23 @@ public class ActivityLogService {
         activityLog.setNotes(request.getDescription());
         return activityLogRepository.save(activityLog);
 	}
+
+	 public List<ActivityLogResponse> getAllActivityLogs() {
+	        List<ActivityLog> logs = activityLogRepository.findAll();
+
+	        // Convert to response DTO
+	        return logs.stream().map(log -> new ActivityLogResponse(
+	                log.getId(),
+	                log.getUser().getId(),
+	                log.getUser().getName(),
+	                log.getProgram().getId(),
+	                log.getProgram().getName(),
+	                log.getActivityDate(),
+	                log.getActivityType().name(),
+	                log.getWorkContext().name(),
+	                log.getOutputCount(),
+	                log.getNotes()
+	        )).toList();
+	    }
 
 }

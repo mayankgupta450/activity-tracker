@@ -1,11 +1,14 @@
 package com.activitytracker.controller;
 
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -13,6 +16,7 @@ import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.activitytracker.dto.ActivityLogRequest;
+import com.activitytracker.dto.ActivityLogResponse;
 import com.activitytracker.dto.UserProgramResponse;
 import com.activitytracker.entity.ActivityLog;
 import com.activitytracker.entity.ActivityType;
@@ -96,10 +100,33 @@ public class ActivityController {
 	    public ResponseEntity<?> saveActivity(
 	            @RequestBody ActivityLogRequest request
 	    ) {
-	        ActivityLog savedActivity = activityLogService.saveActivity(request);
+	        try {
+	            activityLogService.saveActivity(request);
 
-	        return ResponseEntity.ok(savedActivity);
+	            // Success response
+				Map<String, String> response = new HashMap<>();
+				response.put("message", "Activity created successfully");
+				return ResponseEntity.ok(response);
+
+			} catch (RuntimeException e) {
+				//this run due to some validation failed error user not found etc type errro
+				Map<String, String> error = new HashMap<>();
+				error.put("error", e.getMessage());
+				return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(error);
+			}
+			catch (Exception e) {
+	            Map<String, String> error = new HashMap<>();
+	            error.put("error", "Something went wrong");
+	            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(error);
+	        }
+
 	    }
 	 
+	    @GetMapping("/getall-activity")
+	    @PreAuthorize("hasRole('ADMIN')")
+	    public ResponseEntity<List<ActivityLogResponse>> getAllActivityLogs() {
+	        List<ActivityLogResponse> allActivityData = activityLogService.getAllActivityLogs();
+	        return ResponseEntity.ok(allActivityData);
+	    }
 
 }

@@ -139,4 +139,23 @@ public class ActivityController {
 	        return ResponseEntity.ok(activities);
 	    }
 
+	    @GetMapping("/admin/program-output-count")
+	    @PreAuthorize("hasRole('ADMIN')")
+	    public ResponseEntity<?> getProgramOutputSummary() {
+
+	        try {
+	        	 Map<String, Object> data = activityLogService.getProgramOutput();
+	             return ResponseEntity.ok(data);
+
+	        } catch (RuntimeException e) {
+	            Map<String, String> error = new HashMap<>();
+	            error.put("error", e.getMessage());
+	            return ResponseEntity.badRequest().body(error);
+
+	        } catch (Exception e) {
+	            Map<String, String> error = new HashMap<>();
+	            error.put("error", "Something went wrong");
+	            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(error);
+	        }
+	    }
 }

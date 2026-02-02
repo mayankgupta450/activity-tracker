@@ -67,7 +67,6 @@ public class UserService {
 																			// password
 		user.setRole(role);
 
-		User savedUser = userRepository.save(user);  //saving user inton table db
 
 		List<UserProgram> userPrograms = new ArrayList<>();
 		boolean isAdmin = "ADMIN".equalsIgnoreCase(role.getRoleName());
@@ -78,6 +77,7 @@ public class UserService {
 		        }
 		    }
 
+		User savedUser = userRepository.save(user);  //saving user inton table db
 		//getting program id multiple from ui thats why looping done
 		if (request.getProgramIds() != null && !request.getProgramIds().isEmpty()) {
 		for (Long programId : request.getProgramIds()) {

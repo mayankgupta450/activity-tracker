@@ -19,4 +19,6 @@ public interface UserProgramRepository extends JpaRepository<UserProgram, Long> 
 	    )
 	  List<UserProgram> findProgramsByUserId(@Param("userId") Long userId);
 
+	 boolean existsByUser_IdAndProgram_Id(Long userId, Long programId);
+
 }

@@ -113,6 +113,7 @@ public class AuthController {
 
 	// api for register user
 	@PostMapping("/api/admin/users")
+	@PreAuthorize("hasRole('ADMIN')")
 	public ResponseEntity<?> registerUser(@Valid @RequestBody RegisterRequestDto request, BindingResult bindingResult) {
 
 		// validation using dependency
@@ -132,6 +133,7 @@ public class AuthController {
 	}
 
 	@GetMapping("api/admin/users")
+	@PreAuthorize("hasRole('ADMIN')")
 	public ResponseEntity<?> getAllUsers() {
 		try {
 			List<UserResponseDto> users = service.getAllUsers();

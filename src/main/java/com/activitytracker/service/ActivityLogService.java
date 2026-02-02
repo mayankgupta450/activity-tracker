@@ -18,6 +18,7 @@ import com.activitytracker.entity.User;
 import com.activitytracker.entity.WorkContext;
 import com.activitytracker.repo.ActivityLogRepository;
 import com.activitytracker.repo.ProgramRepository;
+import com.activitytracker.repo.UserProgramRepository;
 import com.activitytracker.repo.UserRepository;
 
 @Service
@@ -31,6 +32,9 @@ public class ActivityLogService {
 
 	@Autowired
 	private ProgramRepository programRepository;
+	
+	@Autowired
+	UserProgramRepository userProgramRepository;
 
 	public ActivityLog saveActivity(ActivityLogRequest request) {
 
@@ -43,6 +47,16 @@ public class ActivityLogService {
 				.orElseThrow(() -> new RuntimeException("Program not found"));
 
 		ActivityType activityType = ActivityType.valueOf(request.getActivityTypeId());
+		
+		boolean isAssigned = userProgramRepository
+		        .existsByUser_IdAndProgram_Id(
+		                request.getUserId(),
+		                request.getProgramId()
+		        );
+		System.out.println("isAssigned "+isAssigned);
+		if (!isAssigned) {
+		        throw new RuntimeException("Program is not assigned to this user");
+		    }
 		if (activityType == ActivityType.TASK_EXECUTION && request.getOutputCount() < 1) {
 
 			throw new ResponseStatusException(HttpStatus.BAD_REQUEST,

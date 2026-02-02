@@ -7,6 +7,7 @@ import java.util.Map;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -28,6 +29,7 @@ public class ProgramController {
 	
 	  // Create program
     @PostMapping("/api/admin/programs")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<?> createProgram(
             @Valid @RequestBody ProgramRequestDto request,
             BindingResult bindingResult) {
@@ -46,6 +48,7 @@ public class ProgramController {
 
     // Get all programs
     @GetMapping("/api/admin/programs")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<List<ProgramResponseDto>> getAllPrograms() {
         List<ProgramResponseDto> programs = programService.getAllPrograms();
         return ResponseEntity.ok(programs);

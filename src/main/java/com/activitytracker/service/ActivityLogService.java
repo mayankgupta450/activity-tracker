@@ -1,5 +1,6 @@
 package com.activitytracker.service;
 
+import java.time.LocalDate;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -46,8 +47,10 @@ public class ActivityLogService {
 		Program program = programRepository.findById(request.getProgramId())
 				.orElseThrow(() -> new RuntimeException("Program not found"));
 
+		//getting activitytype object
 		ActivityType activityType = ActivityType.valueOf(request.getActivityTypeId());
 		
+		//checking before saving that in user program table program is assigned to user or not
 		boolean isAssigned = userProgramRepository
 		        .existsByUser_IdAndProgram_Id(
 		                request.getUserId(),
@@ -62,6 +65,12 @@ public class ActivityLogService {
 			throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
 					"Output count must be greater than or equal to 1 for TASK_EXECUTION");
 		}
+		
+		//checking acitivity date is gretaer then current date at time of creation or not
+		 if (request.getDate().isAfter(LocalDate.now())) {
+		        throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+		                "Activity date cannot be greater then current date");
+		    }
 		// creating object of activity
 		ActivityLog activityLog = new ActivityLog();
 		activityLog.setUser(user);

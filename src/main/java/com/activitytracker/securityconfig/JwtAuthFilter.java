@@ -1,6 +1,8 @@
 package com.activitytracker.securityconfig;
 
 import java.io.IOException;
+import java.util.HashMap;
+import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -14,6 +16,7 @@ import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import tools.jackson.databind.ObjectMapper;
 
 @Component
 public class JwtAuthFilter extends OncePerRequestFilter {
@@ -45,6 +48,7 @@ public class JwtAuthFilter extends OncePerRequestFilter {
         String token = null;
         String username = null;
 
+        try {
         // extracting token 
         if (authHeader != null && authHeader.startsWith("Bearer ")) {
             token = authHeader.substring(7);
@@ -77,6 +81,19 @@ public class JwtAuthFilter extends OncePerRequestFilter {
 
         // Continue request flow
         filterChain.doFilter(request, response);
+        }
+        catch(Exception ex) {  // handling exception when token is invalid or expired it throw error from here
+        	 SecurityContextHolder.clearContext();
+
+             // Prepare JSON response
+             response.setContentType("application/json");
+             response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+             Map<String, Object> body = new HashMap<>();
+             body.put("status", 401);
+             body.put("error", "Unauthorized");
+             body.put("message", "token invalid or expired please generate new token via login then use");
+             new ObjectMapper().writeValue(response.getOutputStream(), body);
+        }
     }
 
 }

@@ -1,12 +1,15 @@
 package com.activitytracker.controller;
 
+import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -158,4 +161,40 @@ public class ActivityController {
 	            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(error);
 	        }
 	    }
+	    
+	    @GetMapping("/export-activities")
+	    @PreAuthorize("hasRole('ADMIN')")
+	    public ResponseEntity<byte[]> exportActivities() {
+	        try {
+	        	//extracting all data from db
+	            List<ActivityLogResponse> activities = activityLogService.getAllActivityLogs();
+
+	            //seeting table header
+	            StringBuilder sb = new StringBuilder();
+	            sb.append("User ID,User Name,Program Name,Activity Date,Activity Type,Work Context,Output Count,Notes\n");
+
+	            for (ActivityLogResponse a : activities) {
+	                sb.append(a.getUserId()).append(",");
+	                sb.append('"').append(a.getUserName().replace("\"", "\"\"")).append("\",");
+	                sb.append('"').append(a.getProgramName().replace("\"", "\"\"")).append("\",");
+	                sb.append(a.getActivityDate()).append(",");
+	                sb.append(a.getActivityType()).append(",");
+	                sb.append(a.getWorkContext()).append(",");
+	                sb.append(a.getOutputCount()).append(",");
+	                sb.append('"').append(a.getNotes().replace("\"", "\"\"")).append("\"\n");
+	            }
+
+	            byte[] csvBytes = sb.toString().getBytes(StandardCharsets.UTF_8);
+
+	            return ResponseEntity.ok()
+	                    .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=activity_logs.csv")
+	                    .contentType(new MediaType("text", "csv"))
+	                    .body(csvBytes);
+
+	        } catch (Exception e) {
+	            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+	        }
+	    }
+
+	    
 }

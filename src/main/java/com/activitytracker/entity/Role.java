@@ -25,5 +25,10 @@ public class Role {
     @Column(unique = true, nullable = false)
     private String roleName; 
 	
+    
+    // want this for intial intilaization when applicationstart
+    public Role(String roleName) {
+        this.roleName = roleName;
+    }
 
 }

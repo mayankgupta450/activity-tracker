@@ -70,8 +70,16 @@ public class UserService {
 		User savedUser = userRepository.save(user);  //saving user inton table db
 
 		List<UserProgram> userPrograms = new ArrayList<>();
+		boolean isAdmin = "ADMIN".equalsIgnoreCase(role.getRoleName());
+		if (!isAdmin) {
+		        //  non admin have must to program id
+		        if (request.getProgramIds() == null || request.getProgramIds().isEmpty()) {
+		            throw new RuntimeException("Program is mandatory for non-admin users");
+		        }
+		    }
 
 		//getting program id multiple from ui thats why looping done
+		if (request.getProgramIds() != null && !request.getProgramIds().isEmpty()) {
 		for (Long programId : request.getProgramIds()) {
 			Program program = programRepository.findById(programId)
 					.orElseThrow(() -> new RuntimeException("Program not found"));
@@ -84,6 +92,7 @@ public class UserService {
 
 		//now saving data in program table in db
 		userProgramRepository.saveAll(userPrograms);
+		}
 		
 		List<String> programNames = userPrograms.stream().map(up -> up.getProgram().getName()).toList();
 

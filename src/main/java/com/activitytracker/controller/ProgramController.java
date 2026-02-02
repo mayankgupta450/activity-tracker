@@ -10,7 +10,9 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -54,5 +56,17 @@ public class ProgramController {
         return ResponseEntity.ok(programs);
     }
 	
+    @PutMapping("/api/admin/{userId}/programs")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<?> updateUserPrograms(
+            @PathVariable Long userId,
+            @RequestBody List<Long> programIds) {
+    	programService.updateUserPrograms(userId, programIds);
+
+        Map<String, String> response = new HashMap<>();
+        response.put("message", "Programs updated successfully");
+        return ResponseEntity.ok(response);
+    }
+
 
 }

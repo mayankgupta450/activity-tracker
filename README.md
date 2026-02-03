@@ -57,7 +57,7 @@ All Tables will be created automatically on server start & two roles were create
 
 * use this credentials to generate intial jwt token *
 *********
-Step 4: Create normal User to access user dashboard 
+Step 3: Create normal User to access user dashboard 
 
 :Use the Register API in Postman to create a new user. Ensure the correct role ID of user role is provided in the request body.
 
@@ -70,7 +70,7 @@ Notes:
 :Admin registration does not require a program ID mandatory validation done on backend and user requires programId to register new user
 
 *********
-Step 5: Authentication & Authorization
+Note:> Authentication & Authorization
 
 :All APIs except Login are secured via JWT Token which returned in response after login
 
